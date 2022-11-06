@@ -1,4 +1,4 @@
-# reCaptcha
+## reCaptcha
 
 # Installation
 Just clone this repository and run it
