@@ -1,9 +1,9 @@
-## reCaptcha
+# reCaptcha
 
-# Installation
+## Installation
 Just clone this repository and run it
 
-# How it works
+## How it works
 On the home page:
 - set "Site key" field to get token
 - set "Secret key" field to verify token
