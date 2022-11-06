@@ -1,0 +1,142 @@
+﻿@{
+    ViewData["Title"] = "reCaptcha client";
+}
+
+@section Scripts {
+    <script>
+        let script = null
+
+        function reCaptchaGetToken() {
+            localStorage.setItem('site-key', document.getElementById('site-key').value)
+
+            document.getElementById('btn-get-token').disabled = true
+
+            const url = formatUrl(document.getElementById('token-url').value)
+
+            if(!script || script.src != url) {
+                if(script) {
+                    script.remove()
+                }
+
+                script = loadScript(
+                    url, 
+                    () => {
+                        processGettingToken()
+                    }
+                )            
+            } else {
+                processGettingToken()
+            }
+        }
+
+        function processGettingToken() {
+            grecaptcha.ready(() => {
+                grecaptcha.execute(
+                    document.getElementById('site-key').value, 
+                    {
+                        action: 'submit'
+                    }
+                ).then(
+                    token => { 
+                        document.getElementById('token').value = token
+                        document.getElementById('btn-get-token').disabled = false
+                    }
+                )
+            })
+        }
+
+        function reCaptchaVerify() {
+            localStorage.setItem('secret-key', document.getElementById('secret-key').value)
+    
+            document.getElementById('btn-verify-token').disabled = true
+
+            fetch(
+                `/home/verify?token=${document.getElementById('token').value}&secret=${document.getElementById('secret-key').value}&verificationUrl=${document.getElementById('verification-url').value}`
+            ).then(
+                res => res.text().then(
+                    data => {
+                        document.getElementById('verification-result').value = data
+                        document.getElementById('btn-verify-token').disabled = false
+                    }
+                )
+            )    
+        }
+    </script>
+}
+
+<div class="text-center mb-3 row">
+    <input 
+        id="token-url"
+        type="text" 
+        class="form-control"             
+        placeholder="Url to generate token"
+        value="https://www.google.com/recaptcha/api.js?render={site-key}"
+    >
+</div>
+<div class="text-center mb-3 row">    
+    <div class="col-sm-10">
+        <input 
+            id="site-key"
+            type="text" 
+            class="form-control"             
+            placeholder="Site key"
+        >
+    </div>    
+    <button 
+        id="btn-get-token"
+        class="btn btn-primary col-sm-2"
+        onclick="reCaptchaGetToken()"
+    >
+        Get Token
+    </button>
+</div>
+<div class="text-center mb-3 row">
+    <textarea 
+        id="token" 
+        class="form-control"         
+        rows="9"
+        placeholder="Token"
+        readonly
+    ></textarea>
+</div>
+
+<div class="text-center mb-3 row">
+    <input 
+        id="verification-url"
+        type="text" 
+        class="form-control"             
+        placeholder="Url to verify token"
+        value="https://www.google.com/recaptcha/api/siteverify"
+    >
+</div>
+<div class="text-center mb-3 row">    
+    <div class="col-sm-10">
+        <input 
+            id="secret-key"
+            type="text" 
+            class="form-control"             
+            placeholder="Secret key"
+        >
+    </div>
+    <button 
+        id="btn-verify-token"
+        class="btn btn-primary col-sm-2"
+        onclick="reCaptchaVerify()"
+    >
+        Verify
+    </button>
+</div>
+<div class="text-center row">
+    <textarea 
+        id="verification-result" 
+        class="form-control"         
+        rows="9"
+        placeholder="Verification result"
+        readonly
+    ></textarea>
+</div>
+
+<script>
+    document.getElementById('site-key').value = localStorage.getItem('site-key')
+    document.getElementById('secret-key').value = localStorage.getItem('secret-key')
+</script>
